@@ -1,73 +1,127 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+## Install and Launch the API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-  
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+After cloning the repository and with the credentials included in the `.env` configuration file, we are going to install it and for that we need [Docker](https://www.docker.com) installed to build the images.
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Installation
+We run the commands:
 
 ```bash
-$ npm install
+$ docker build -t will-bank/node-mongo:latest .
 ```
 
-## Running the app
+And then:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+$ docker-compose up
 ```
+
+It's a process that can take a few minutes, but after that, we'll have everything we need to use the endpoints.
 
 ## Test
+To run the tests, we use:
 
 ```bash
 # unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+$ yarn test
 ```
 
-## Support
+## Database
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+We are currently using the [Mongo Database](https://www.mongodb.com/pt-br) for the simple fact that we do not need to design a schema in the database, as the payment service was created in a generic way and can be scaled to other types of payment, not just ticket.
 
-## Stay in touch
+## Swagger
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+The swagger server runs on `http://localhost:4001/swagger`
 
-## License
+## Application
 
-  Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Create User
+
+Example to create user on endpoint: `http://localhost:4001/user` - `POST`
+```json
+{
+    "isAdmin": true,
+    "firstName": "Jack",
+    "lastName": "Ryan",
+    "email": "jack.ryan@gmail.com",
+    "password": "1234567aA@"
+}
+```
+
+When we create a user, it already returns an accessToken so we can use it on other endpoints that require authentication.
+
+### Login
+
+Example for logging into the application: `http://localhost:4001/auth/login` - `POST`
+```json
+{
+    "email": "jack.ryan@gmail.com",
+    "password": "1234567aA@"
+}
+```
+
+Return example:
+
+```json
+{
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+}
+```
+
+Now we can use endpoints that require authentication.
+
+### Payment
+
+To pay a ticket it's necessary to be authenticated and make a request to `http://localhost:4001/payment/ticket` - `POST`
+
+Payload example:
+
+```json
+{
+    "billet": "82650000001132311699000900202215332047616454199",
+    "amount": "2000"
+}
+```
+
+Return example
+
+```json
+{
+    "paymentDate": "2022-08-27T21:41:56.630Z",
+    "retryPay": 0,
+    "errorMessage": null,
+    "_id": "630a8fa49899184a20507af4",
+    "userId": "630a85d6d75c5a002dc83844",
+    "metadata": {
+        "cashBackValueReceived": 420,
+        "billet": "82650000001132311699000900202215332047616454199",
+        "amount": "2000",
+        "transactiondId": "416c203b-1842-4a10-baad-fbfab50de355"
+    },
+    "paymentType": "TICKET",
+    "status": "SUCCESS",
+    "createdAt": "2022-08-27T21:41:56.632Z",
+    "updatedAt": "2022-08-27T21:41:56.632Z",
+    "__v": 0
+}
+```
+
+### Cash back
+Only those who can register a cashback rule are users who are administrators of the application. If when you registered a user informed the property `isADmin: true`, the user is an administrator and you can register cashback rules.
+
+The rule
+
+To register a cash back rule it is necessary to make a request to `http://localhost:4001/cash-back/rules` - `POST`
+
+Payload example:
+
+```json
+
+{
+     "active": true,
+     "from": 2000,
+     "to": 5000,
+     "percentage": 4
+}
+```
+
+With this rule registered, any user who makes the payment of a boleto whose value is between 2000 and 5000, will earn 4% cashback that will be added to the account balance.
