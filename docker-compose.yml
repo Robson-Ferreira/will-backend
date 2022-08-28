@@ -1,0 +1,27 @@
+version: "3.7"
+
+services:
+  app:
+    env_file:
+      - .env
+    image: will-bank/node-mongo:latest # nome que você deu a imagem
+    container_name: 'will-bank'
+    restart: always
+    ports:
+      - '${APP_PORT}:${APP_PORT}'
+    volumes:
+      - ./:/usr/app
+    working_dir: /usr/app
+    command: yarn start:dev
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '5'
+  mongodb:
+    image: mongo
+    container_name: will-database
+    restart: always
+    ports:
+      - 27017:27017
+
