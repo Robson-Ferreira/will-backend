@@ -125,3 +125,8 @@ Payload example:
 ```
 
 With this rule registered, any user who makes the payment of a boleto whose value is between 2000 and 5000, will earn 4% cashback that will be added to the account balance.
+
+### Transaction History
+
+All users can see the history of payments made. To do this, simply make a request to `http://localhost:4001/payment/transactions` - `GET`.
+This endpoint returns to us, in a paged form, all the transactions carried out by the logged-in user. To see all available filters, see swagger.
