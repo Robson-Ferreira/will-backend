@@ -106,7 +106,7 @@ Return example
 ```
 
 ### Cash back
-Only those who can register a cashback rule are users who are administrators of the application. If when you registered a user informed the property `isADmin: true`, the user is an administrator and you can register cashback rules.
+Only those who can register a cashback rule are users who are administrators of the application. If when you registered a user informed the property `isAdmin: true`, the user is an administrator and you can register cashback rules.
 
 The rule
 
