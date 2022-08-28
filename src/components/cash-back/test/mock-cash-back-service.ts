@@ -8,7 +8,7 @@ export class CashBackServiceSpy implements CashBackServiceInterface {
   payload: any = null;
 
   getCashBackByValue(): Promise<CashBackEntity> {
-    throw new Error('Method not implemented.');
+    return Promise.resolve(mockCashBack());
   }
 
   createCashBackRule(payload: CreateCashBackDto): Promise<CashBackEntity> {

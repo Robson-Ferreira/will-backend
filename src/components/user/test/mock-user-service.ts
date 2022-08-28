@@ -23,7 +23,7 @@ export class UserServiceSpy implements UserServiceInterface {
   }
 
   findOneAndUpdate(): Promise<UserEntity> {
-    throw new Error('Method not implemented.');
+    return Promise.resolve(mockUser());
   }
 }
 
