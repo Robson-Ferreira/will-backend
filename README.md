@@ -130,3 +130,7 @@ With this rule registered, any user who makes the payment of a boleto whose valu
 
 All users can see the history of payments made. To do this, simply make a request to `http://localhost:4001/payment/transactions` - `GET`.
 This endpoint returns to us, in a paged form, all the transactions carried out by the logged-in user. To see all available filters, see swagger.
+
+### Fault Tolerance
+When making the payment of a boleto, in case there is any failure in the entire flow, we will register the payment request with the data informed and a cron job will work to try to make the payment again up to 3 times in a period of 30 minutes, that is, every 10 minutes it will try to make the payment of the ticket again, if it is not successful, we will send an email to the user informing that there was an error when processing the payment of the ticket and that he should contact the call center .
+
