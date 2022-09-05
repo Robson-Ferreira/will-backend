@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Metadata } from './pay-ticket-response.dto';
 
-class TransactionHistoryResponseDto {
+class PaymentTicketTransactionsResponseDto {
   _id: string;
   metadata: Metadata;
   status: string;
   paymentDate: Date;
 }
 
-export class TransactionHistoryResponsePaginatedDto {
+export class PaymentTicketTransactionsResponsePaginatedDto {
   @ApiProperty({
     type: Number,
     example: 100,
@@ -28,7 +28,7 @@ export class TransactionHistoryResponsePaginatedDto {
   page: number;
 
   @ApiProperty({
-    type: [TransactionHistoryResponseDto],
+    type: [PaymentTicketTransactionsResponseDto],
     example: {
       _id: '63058a9cf3006701d40189f5',
       metadata: {
@@ -41,5 +41,5 @@ export class TransactionHistoryResponsePaginatedDto {
       paymentDate: new Date(),
     },
   })
-  data: TransactionHistoryResponseDto[];
+  data: PaymentTicketTransactionsResponseDto[];
 }

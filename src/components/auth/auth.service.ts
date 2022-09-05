@@ -31,7 +31,10 @@ export class AuthService implements AuthServiceInterface {
         );
       }
 
+      delete user.password;
+
       return {
+        ...user,
         accessToken: this.generateToken(user),
       };
     } catch (error: any) {

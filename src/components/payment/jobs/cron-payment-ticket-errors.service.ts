@@ -31,9 +31,6 @@ export class CronPaymentService {
     const paymentsError = await this.PaymentModel.find({
       status: PaymentStatus.PENDING,
       paymentType: PaymentTypes.TICKET,
-      retryPay: {
-        $lt: Env.LIMIT_TO_TRY_PAY_AGAIN,
-      },
     });
 
     if (paymentsError.length) {
@@ -49,7 +46,7 @@ export class CronPaymentService {
     for await (const payment of paymentsError) {
       const paymentAgain = await this.paymentService.payTicket(
         {
-          _id: payment.id,
+          _id: payment._id,
           billet: payment.metadata.billet,
           amount: payment.metadata.amount,
         },
@@ -64,12 +61,14 @@ export class CronPaymentService {
           },
           { useFindAndModify: false },
         );
-        await this.notifyUserByEmail(payment);
+        await this.notifyUserByEmailPaymentError(payment);
       }
     }
   }
 
-  private async notifyUserByEmail(payment: PaymentDocument): Promise<void> {
+  private async notifyUserByEmailPaymentError(
+    payment: PaymentDocument,
+  ): Promise<void> {
     const { email: userEmail } = await this.userService.getUserById(
       payment.userId,
     );

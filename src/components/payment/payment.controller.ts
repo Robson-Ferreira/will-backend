@@ -16,7 +16,7 @@ import {
   GetTransactionHistoryDto,
   PayTicketDto,
   PayTicketResponseDto,
-  TransactionHistoryResponsePaginatedDto,
+  PaymentTicketTransactionsResponsePaginatedDto,
 } from './dto';
 import { PaymentServiceInterface } from './interface';
 import { PaymentEntity, PaymentStatus } from './schemas';
@@ -51,12 +51,18 @@ export class PaymentController {
       );
     }
 
+    if (hasBeenPaid && hasBeenPaid.status === PaymentStatus.ERROR) {
+      throw new ConflictException(
+        `There was a failure to pay the ticket, please contact the call center.`,
+      );
+    }
+
     return this.paymentService.payTicket(payload, req.userId);
   }
 
-  @Get('/transactions')
+  @Get('/ticket/transactions')
   @UseGuards(JWTGuard)
-  @ApiOkResponse({ type: TransactionHistoryResponsePaginatedDto })
+  @ApiOkResponse({ type: PaymentTicketTransactionsResponsePaginatedDto })
   @ApiBearerAuth()
   async transactionHistory(
     @Req() req: any,

@@ -4,10 +4,11 @@ import {
   PaymentProcessServiceInterface,
   PaymentServiceInterface,
   RemotePaymentServiceInterface,
+  RemoteResponsePaymentService,
 } from './interface';
 import { CashBackServiceInterface } from '../cash-back/interface';
 import { UserServiceInterface } from '../user/interface';
-import { PaymentDocument, PaymentEntity, PaymentStatus } from './schemas';
+import { PaymentDocument, PaymentEntity, PaymentTypes } from './schemas';
 import { LeanDocument, Model } from 'mongoose';
 import { Env } from '../../commons/environment';
 import { InjectModel } from '@nestjs/mongoose';
@@ -34,10 +35,11 @@ export class PaymentService implements PaymentServiceInterface {
     userId: string,
   ): Promise<LeanDocument<PaymentEntity>> {
     try {
-      const providerResponse = await this.remotePaymentService.pay({
-        payloadToSend: payload,
-        paymentProviderEndpoint: Env.PAYMENT_TICKET_PROVIDER_ENDPOINT,
-      });
+      const providerResponse: RemoteResponsePaymentService =
+        await this.remotePaymentService.pay({
+          payloadToSend: payload,
+          paymentProviderEndpoint: Env.PAYMENT_TICKET_PROVIDER_ENDPOINT,
+        });
 
       const cashBackValue = await this.getCashBack(payload);
 
@@ -47,7 +49,9 @@ export class PaymentService implements PaymentServiceInterface {
         ...providerResponse,
       });
 
-      await this.updateUserCashBack(userId, cashBackValue);
+      if (cashBackValue) {
+        await this.updateUserCashBack(userId, cashBackValue);
+      }
 
       if (payload.campaign) {
         await this.metricsService.updateCampaignValues(payload.campaign, {
@@ -99,9 +103,6 @@ export class PaymentService implements PaymentServiceInterface {
   async hasBeenPaid(billet: string): Promise<PaymentEntity> {
     return this.PaymentModel.findOne({
       'metadata.billet': billet,
-      status: {
-        $nin: [PaymentStatus.ERROR],
-      },
     }).lean();
   }
 
@@ -140,7 +141,11 @@ export class PaymentService implements PaymentServiceInterface {
     const pageSize = query?.pageSize ? Number(query?.pageSize) : 5;
     const page = query?.page ? Number(query?.page) : 1;
 
-    const result = await this.PaymentModel.find({ ...filterConditions, userId })
+    const result = await this.PaymentModel.find({
+      ...filterConditions,
+      paymentType: PaymentTypes.TICKET,
+      userId,
+    })
       .select({ metadata: 1, status: 1, paymentDate: 1 })
       .limit(pageSize)
       .skip(pageSize * (page - 1))
