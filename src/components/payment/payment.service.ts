@@ -55,8 +55,8 @@ export class PaymentService implements PaymentServiceInterface {
 
       if (payload.campaign) {
         await this.metricsService.updateCampaignValues(payload.campaign, {
-          successfulPayments: {
-            $inc: 1,
+          $inc: {
+            successfulPayments: 1,
           },
         });
       }
@@ -65,8 +65,8 @@ export class PaymentService implements PaymentServiceInterface {
     } catch (error: any) {
       if (payload.campaign) {
         await this.metricsService.updateCampaignValues(payload.campaign, {
-          failedPayments: {
-            $inc: 1,
+          $inc: {
+            failedPayments: 1,
           },
         });
       }

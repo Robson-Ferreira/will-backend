@@ -1,6 +1,6 @@
 import { ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { LeanDocument, Model } from 'mongoose';
 import { CreateMetricDto } from './dto';
 import { MetricsServiceInterface } from './interface';
 import { MetricsDocument, MetricsEntity } from './schemas';
@@ -42,5 +42,11 @@ export class MetricsService implements MetricsServiceInterface {
       data,
       { useFindAndModify: false, new: true },
     ).lean();
+  }
+
+  async getMetricCampaign(
+    campaignName: string,
+  ): Promise<LeanDocument<MetricsEntity>> {
+    return this.MetricsModel.findOne({ campaign: campaignName }).lean();
   }
 }

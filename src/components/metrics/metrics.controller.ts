@@ -1,4 +1,12 @@
-import { Body, Controller, Inject, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { IsAdminGuard, JWTGuard } from '../../commons/guards';
 import { CreateMetricDto } from './dto';
@@ -16,5 +24,11 @@ export class MetricsController {
   @UseGuards(JWTGuard, IsAdminGuard)
   async createMetric(@Body() payload: CreateMetricDto): Promise<any> {
     return this.metricsService.createMetric(payload);
+  }
+
+  @Get(':campaign')
+  @UseGuards(JWTGuard, IsAdminGuard)
+  async getMetrics(@Param('campaign') campaignName: string): Promise<any> {
+    return this.metricsService.getMetricCampaign(campaignName);
   }
 }

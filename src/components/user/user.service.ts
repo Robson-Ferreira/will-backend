@@ -36,14 +36,6 @@ export class UserService implements UserServiceInterface {
 
   async createUser(data: CreateUserDto): Promise<UserEntity> {
     try {
-      if (data.campaign) {
-        await this.metricsService.updateCampaignValues(data.campaign, {
-          newUsers: {
-            $inc: 1,
-          },
-        });
-      }
-
       const userAlreadyExists = await this.UserModel.findOne({
         email: data.email,
       }).lean();
@@ -62,6 +54,14 @@ export class UserService implements UserServiceInterface {
       ).toJSON();
 
       delete user.password;
+
+      if (data.campaign) {
+        await this.metricsService.updateCampaignValues(data.campaign, {
+          $push: {
+            newUsers: user._id,
+          },
+        });
+      }
 
       return {
         ...user,
