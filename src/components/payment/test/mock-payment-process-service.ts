@@ -19,7 +19,10 @@ export class PaymentProcessServiceSpy
     return Promise.resolve(mockPaymentTicket());
   }
 
-  registerPaymentError(): Promise<LeanDocument<PaymentEntity>> {
-    throw new Error('Method not implemented.');
+  registerPaymentError(userId: string, errorMessage: string, data: any): any {
+    this.callsCount++;
+    this.payload = { ...data, errorMessage, userId };
+
+    return Promise.resolve({});
   }
 }

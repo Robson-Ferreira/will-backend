@@ -11,11 +11,15 @@ import {
   PaymentProcessServiceSpy,
   RemotePaymentServiceSpy,
 } from './test';
-import { PaymentProcessServiceInterface } from './interface';
+import {
+  PaymentProcessServiceInterface,
+  RemotePaymentServiceInterface,
+} from './interface';
 
 type SutTypes = {
   sut: PaymentService;
   paymentProcessService: PaymentProcessServiceSpy;
+  remotePaymentService: RemotePaymentServiceSpy;
 };
 
 const makeSut = async (): Promise<SutTypes> => {
@@ -53,8 +57,11 @@ const makeSut = async (): Promise<SutTypes> => {
   const paymentProcessService = module.get<PaymentProcessServiceInterface>(
     'PaymentProcessServiceInterface',
   ) as PaymentProcessServiceSpy;
+  const remotePaymentService = module.get<RemotePaymentServiceInterface>(
+    'RemotePaymentServiceInterface',
+  ) as RemotePaymentServiceSpy;
 
-  return { sut, paymentProcessService };
+  return { sut, paymentProcessService, remotePaymentService };
 };
 
 describe('PaymentService', () => {
@@ -79,6 +86,28 @@ describe('PaymentService', () => {
 
     expect(response).toHaveProperty('_id');
     expect(response).toHaveProperty('paymentDate');
+    expect(paymentProcessService.callsCount).toBe(1);
+  });
+
+  it('should be pay an ticket with error', async () => {
+    const { sut, remotePaymentService, paymentProcessService } =
+      await makeSut();
+
+    const mockedPayment = mockPayTicket();
+    const mockedUser = mockUser();
+
+    const payload: PayTicketDto = {
+      billet: mockedPayment.billet,
+      amount: mockedPayment.amount,
+    };
+
+    jest.spyOn(remotePaymentService, 'pay').mockImplementationOnce((): any => {
+      throw new Error('mock test error');
+    });
+
+    expect(async () => {
+      await sut.payTicket(payload, mockedUser._id);
+    }).rejects.toThrowError('mock test error');
     expect(paymentProcessService.callsCount).toBe(1);
   });
 });
